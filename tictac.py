@@ -33,59 +33,65 @@ class Game(object):
         bottom_frame = tkinter.Frame(parent)
         bottom_frame.pack(side=tkinter.BOTTOM)
 
+        # Create a canvas widget
+        self.board_canvas = tkinter.Canvas(center_frame,
+                                           width=Game.BOARD_SIZE,
+                                           height=Game.BOARD_SIZE)
+
         # Create the restart button widget
         restart_button = tkinter.Button(top_frame, text="Restart")
+        restart_button.bind("<Button-1>", self.restart)
         restart_button.pack()
 
-        # Create a canvas widget
-        board_canvas = tkinter.Canvas(center_frame, width=Game.BOARD_SIZE,
-                                      height=Game.BOARD_SIZE)
 
-        # Horizontal lines
-        board_canvas.create_line(0,
-                                 Game.PADDING,
-                                 Game.BOARD_SIZE,
-                                 Game.PADDING)
-        board_canvas.create_line(0,
-                                 Game.PADDING * 2,
-                                 Game.BOARD_SIZE,
-                                 Game.PADDING * 2)
 
-        # Vertical lines
-        board_canvas.create_line(Game.PADDING,
-                                 0,
-                                 Game.PADDING,
-                                 Game.BOARD_SIZE)
-        board_canvas.create_line(Game.PADDING * 2,
-                                 0,
-                                 Game.PADDING * 2,
-                                 Game.BOARD_SIZE)
 
         # Bind action
-        board_canvas.bind("<Button-1>", self.play)
-        board_canvas.pack()
+        self.board_canvas.bind("<Button-1>", self.play)
 
         # Create a label widget for the win/lose message
         status_line = tkinter.Label(bottom_frame, text="")
         status_line.pack()
 
         self.status_line = status_line
-        self.board_canvas = board_canvas
 
         self.initialize_game()
 
     def initialize_game(self):
         # These are the initializations that need to happen
         # at the beginning and after restarts
-        self.board = {}
 
-        pass
+        # Horizontal lines
+        self.board_canvas.create_line(0,
+                                 Game.PADDING,
+                                 Game.BOARD_SIZE,
+                                 Game.PADDING)
+        self.board_canvas.create_line(0,
+                                 Game.PADDING * 2,
+                                 Game.BOARD_SIZE,
+                                 Game.PADDING * 2)
 
-    def restart(self):
+        # Vertical lines
+        self.board_canvas.create_line(Game.PADDING,
+                                 0,
+                                 Game.PADDING,
+                                 Game.BOARD_SIZE)
+        self.board_canvas.create_line(Game.PADDING * 2,
+                                 0,
+                                 Game.PADDING * 2,
+                                 Game.BOARD_SIZE)
+        self.board_canvas.pack()
+
+
+    def restart(self, event):
         # This method is invoked when the user clicks on the RESTART button.
         # Erase the canvas
         # invoke initialize_game
+        print("Restarting")
+        self.board_canvas.delete("all")
         self.initialize_game()
+        self.board = dict()
+        self.update_status_line("")
 
     def play(self, event):
         # This method is invoked when the user clicks on a square.
@@ -134,58 +140,54 @@ class Game(object):
         # Check if player won and tie
         end = False
         check = self.check_game()
-        print("Check is:", check)
+
         no_more_moves = self.no_more_moves()
-        if check:
-            self.update_status_line("Congrats, you won!")
-            end = True
-        elif no_more_moves:
-            self.update_status_line("It's a tie!")
-            end = True
-        elif not check and no_more_moves:
-            self.update_status_line("You lost!")
+        if check is not None:
+            if no_more_moves:
+                self.update_status_line("It's a tie!")
+                end = True
+            elif check:
+                self.update_status_line("Congrats, you won!")
+                end = True
+            elif not check:
+                self.update_status_line("You lost!")
         return end
 
     def check_game(self):
         # Check if the game is won or lost
         # Return True or False
-        print("Printing", self.board)
-        for coordinate in sorted(self.board, key=lambda x: x[0]):
-            print("Checking coordinate:", coordinate)
-            if (coordinate[0] == coordinate[1]) and \
-                self.check_diagonal():
-                return True
-            if self.check_vertical() or \
-               self.check_horizontal():
-                return True
-        return False
+        diag_winner = self.check_diagonal()
+        vert_winner = self.check_vertical()
+        hori_winner = self.check_horizontal()
+
+        winner = [diag_winner, vert_winner, hori_winner]
+        print("winner is:", winner)
+
+        if "P" in winner:
+            return True
+        elif "C" in winner:
+            return False
 
     def check_vertical(self):
         print("Checking vertically:")
-        vals = self.get_column_vals()
-        for row in vals:
+        for row in self.get_column_vals():
             result = self.dict_to_vals(row)
-            if len(result) == 3 and len(set(result)) == 1 and result[0] == "P":
-                return True
-        return False
+            if len(result) == 3 and len(set(result)) == 1:
+                return result[0]
 
     def check_horizontal(self):
         print("Checking horizontally:")
-        vals = self.get_row_vals()
-        for row in vals:
+        for row in self.get_row_vals():
             result = self.dict_to_vals(row)
-            if len(result) == 3 and len(set(result)) == 1 and result[0] == "P":
-                return True
-        return False
+            if len(result) == 3 and len(set(result)) == 1:
+                return result[0]
 
     def check_diagonal(self):
         print("Checking diag:")
-        vals = self.get_diag_vals()
-        for row in vals:
+        for row in self.get_diag_vals():
             result = self.dict_to_vals(row)
-            if len(result) == 3 and len(set(result)) == 1 and result[0] == "P":
-                return True
-        return False
+            if len(result) == 3 and len(set(result)) == 1:
+                return result[0]
 
     def get_row_vals(self):
         return [[(k, line) for k in range(0,3)] for line in range(0,3)]
