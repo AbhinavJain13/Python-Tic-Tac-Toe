@@ -16,12 +16,12 @@ class Game(object):
     '''
     Enter the class docstring here
     '''
+    
     BOARD_SIZE = 1000
     DIMENSION = 3
-    PADDING = BOARD_SIZE // DIMENSION
-    # Add your class variables if needed here
-    def __init__(self, parent):
+    GRID_SIZE = BOARD_SIZE // DIMENSION
 
+    def __init__(self, parent):
         parent.title('Tic Tac Toe')
         self.parent = parent
         # Add your instance variables  if needed here
@@ -44,7 +44,6 @@ class Game(object):
         restart_button.bind("<Button-1>", self.restart)
         restart_button.pack()
 
-
         # Bind action
         self.board_canvas.bind("<Button-1>", self.play)
 
@@ -63,19 +62,16 @@ class Game(object):
         for i in range(1, Game.DIMENSION):
             # Horizontal lines
             self.board_canvas.create_line(0,
-                         Game.PADDING * i,
+                         Game.GRID_SIZE * i,
                          Game.BOARD_SIZE,
-                         Game.PADDING * i)
+                         Game.GRID_SIZE * i)
             # Vertical lines
-            self.board_canvas.create_line(Game.PADDING * i,
+            self.board_canvas.create_line(Game.GRID_SIZE * i,
                          0,
-                         Game.PADDING * i,
+                         Game.GRID_SIZE * i,
                          Game.BOARD_SIZE)
 
-
-
         self.board_canvas.pack()
-
 
     def restart(self, event):
         # This method is invoked when the user clicks on the RESTART button.
@@ -97,24 +93,30 @@ class Game(object):
         if (p_column, p_row) in self.board:
             return
 
-        self.move(p_column, p_row, True)
+        self.move((p_column, p_row), True)
         # Player made a move, check if won
         if not self.check_game_ended():
 
             print("Not end, computer's move")
 
-            c_column = random.randint(0, Game.DIMENSION-1)
-            c_row = random.randint(0, Game.DIMENSION-1)
-            while (c_column, c_row) in self.board:
-                c_column = random.randint(0, Game.DIMENSION-1)
-                c_row = random.randint(0, Game.DIMENSION-1)
+            move = self.gen_random_move()
 
-            print("Computer moving to:", (c_column, c_row))
+            print("Computer moving to:", (move))
 
-            self.move(c_column, c_row, False)
+            self.move(move, False)
             self.check_game_ended()
 
-    def move(self, column, row, player):
+    def gen_random_move(self, column=-1, row=-1):
+        if column < 0 or row < 0 or (column, row) in self.board:
+            return self.gen_random_move(random.randint(0, Game.DIMENSION-1),
+                                        random.randint(0, Game.DIMENSION-1))
+        else:
+            return (column, row)
+
+    def move(self, move, player):
+        column = move[0]
+        row = move[1]
+
         if 0 <= column <= Game.DIMENSION and 0 <= row <= Game.DIMENSION:
             if (column, row) not in self.board:
                 if player:
@@ -128,7 +130,6 @@ class Game(object):
         self.status_line.config(text=text)
 
     def no_more_moves(self):
-        print("Filled:",len(self.board))
         return len(self.board) >= Game.DIMENSION * Game.DIMENSION
 
     def check_game_ended(self):
@@ -153,11 +154,11 @@ class Game(object):
     def check_game(self):
         # Check if the game is won or lost
         # Return True or False
-        diag_winner = self.check_diagonal()
-        vert_winner = self.check_vertical()
-        hori_winner = self.check_horizontal()
+        d_winner = self.check_diagonal()
+        v_winner = self.check_vertical()
+        h_winner = self.check_horizontal()
 
-        winner = [diag_winner, vert_winner, hori_winner]
+        winner = [d_winner, v_winner, h_winner]
 
         if "P" in winner:
             return True
@@ -165,44 +166,32 @@ class Game(object):
             return False
 
     def check_vertical(self):
-        for row in self.get_column_vals():
-            result = self.dict_to_vals(row)
+        for row in self.column_victories():
+            result = self.extract_values(row)
             if len(result) == Game.DIMENSION and len(set(result)) == 1:
                 return result[0]
 
     def check_horizontal(self):
-        for row in self.get_row_vals():
-            result = self.dict_to_vals(row)
+        for row in self.row_victories():
+            result = self.extract_values(row)
             if len(result) == Game.DIMENSION and len(set(result)) == 1:
                 return result[0]
 
     def check_diagonal(self):
-        for row in self.get_diag_vals():
-            result = self.dict_to_vals(row)
+        for row in self.diagonal_victories():
+            result = self.extract_values(row)
             if len(result) == Game.DIMENSION and len(set(result)) == 1:
                 return result[0]
 
-    def get_row_vals(self):
-        return [[(k, line) for k in range(Game.DIMENSION)] for line in range(Game.DIMENSION)]
-
-    def get_column_vals(self):
-        return [[(line, k) for k in range(Game.DIMENSION)] for line in range(Game.DIMENSION)]
-
-    def get_diag_vals(self):
-        return [[(i, Game.DIMENSION-1-i) for i in range(Game.DIMENSION-1,-1,
-                                                        -1)], [(i,
-                                                                    i) for i in range(
-            Game.DIMENSION)]]
-
-    def dict_to_vals(self, arr):
+    def extract_values(self, arr):
         return [v for k, v in self.board.items() if k in arr]
 
     def fill_grid(self, column, row, player):
 
         print("Print size:", Game.BOARD_SIZE)
 
-        grid_start = (column * Game.PADDING, row * Game.PADDING)
-        grid_end = (grid_start[0] + Game.PADDING, grid_start[1] + Game.PADDING)
+        grid_start = (column * Game.GRID_SIZE, row * Game.GRID_SIZE)
+        grid_end = (grid_start[0] + Game.GRID_SIZE, grid_start[1] + Game.GRID_SIZE)
         print("Filling:", (grid_start, grid_end))
         color = "green"
         if player != "P":
@@ -214,7 +203,22 @@ class Game(object):
                                            grid_end[1],
                                            fill=color)
     # Add your method definitions here
-
+    @classmethod
+    def row_victories(cls):
+        return ([(k, line)
+                for k in range(cls.DIMENSION)]
+                for line in range(cls.DIMENSION))
+    @classmethod
+    def column_victories(cls):
+        return ([(line, k)
+                for k in range(cls.DIMENSION)]
+                for line in range(cls.DIMENSION))
+    @classmethod
+    def diagonal_victories(cls):
+        return ([(i, Game.DIMENSION-1-i)
+                 for i in range(cls.DIMENSION-1, -1, -1)],
+                [(i, i)
+                 for i in range(cls.DIMENSION)])
 
 def main():
     # Instantiate a root window
@@ -222,7 +226,6 @@ def main():
 
     # Instantiate a Game object
     game = Game(root)
-
 
     # Enter the main event loop
     root.mainloop()
