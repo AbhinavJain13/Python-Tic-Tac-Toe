@@ -101,11 +101,15 @@ class Game(object):
         # Player made a move, check if won
         if not self.check_game_ended():
 
-            c_column = random.randint(0, 3)
-            c_row = random.randint(0, 3)
+            print("Not end, computer's move")
+
+            c_column = random.randint(0, 2)
+            c_row = random.randint(0, 2)
             while (c_column, c_row) in self.board:
-                c_column = random.randint(0, 3)
-                c_row = random.randint(0, 3)
+                c_column = random.randint(0, 2)
+                c_row = random.randint(0, 2)
+
+            print("Computer moving to:", (c_column, c_row))
 
             self.move(c_column, c_row, False)
             self.check_game_ended()
@@ -129,12 +133,17 @@ class Game(object):
     def check_game_ended(self):
         # Check if player won and tie
         end = False
-        if self.check_game():
+        check = self.check_game()
+        print("Check is:", check)
+        no_more_moves = self.no_more_moves()
+        if check:
             self.update_status_line("Congrats, you won!")
             end = True
-        elif self.no_more_moves():
+        elif no_more_moves:
             self.update_status_line("It's a tie!")
             end = True
+        elif not check and no_more_moves:
+            self.update_status_line("You lost!")
         return end
 
     def check_game(self):
@@ -144,50 +153,51 @@ class Game(object):
         for coordinate in sorted(self.board, key=lambda x: x[0]):
             print("Checking coordinate:", coordinate)
             if (coordinate[0] == coordinate[1]) and \
-                self.check_diagonal(coordinate):
+                self.check_diagonal():
                 return True
-            if self.check_vertical(coordinate) or \
-               self.check_horizontal(coordinate):
+            if self.check_vertical() or \
+               self.check_horizontal():
                 return True
         return False
 
-    def check_vertical(self, coordinate):
-        print("Checking vertically:", coordinate)
-        player = self.board.get(coordinate)
-        if not player:
-            return False
+    def check_vertical(self):
+        print("Checking vertically:")
+        vals = self.get_column_vals()
+        for row in vals:
+            result = self.dict_to_vals(row)
+            if len(result) == 3 and len(set(result)) == 1 and result[0] == "P":
+                return True
+        return False
 
-        for index in range(0, 3):
-            iter_coordinate = (coordinate[0], index)
-            if iter_coordinate not in self.board or \
-               self.board[iter_coordinate] != player:
-                return False
-        return True
+    def check_horizontal(self):
+        print("Checking horizontally:")
+        vals = self.get_row_vals()
+        for row in vals:
+            result = self.dict_to_vals(row)
+            if len(result) == 3 and len(set(result)) == 1 and result[0] == "P":
+                return True
+        return False
 
-    def check_horizontal(self, coordinate):
-        print("Checking horizontally:", coordinate)
-        player = self.board.get(coordinate)
-        if not player:
-            return False
+    def check_diagonal(self):
+        print("Checking diag:")
+        vals = self.get_diag_vals()
+        for row in vals:
+            result = self.dict_to_vals(row)
+            if len(result) == 3 and len(set(result)) == 1 and result[0] == "P":
+                return True
+        return False
 
-        for index in range(0, 3):
-            iter_coordinate = (index, coordinate[1])
-            if iter_coordinate not in self.board or \
-               self.board[iter_coordinate] != player:
-                return False
-        return True
+    def get_row_vals(self):
+        return [[(k, line) for k in range(0,3)] for line in range(0,3)]
 
-    def check_diagonal(self, coordinate):
-        print("Checking diagonally:", coordinate)
-        player = self.board.get(coordinate)
-        if not player:
-            return False
+    def get_column_vals(self):
+        return [[(line, k) for k in range(0,3)] for line in range(0,3)]
 
-        victory_moves = set([(0,0),(1,1),(2,2),(2,0),(0,2)])
+    def get_diag_vals(self):
+        return (((0, 0), (1, 1), (2, 2)), ((0, 2), (1, 1), (2, 0)))
 
-
-
-        return True
+    def dict_to_vals(self, arr):
+        return [v for k, v in self.board.items() if k in arr]
 
     def fill_grid(self, column, row, player):
         print("Filling:", (column, row), player)
