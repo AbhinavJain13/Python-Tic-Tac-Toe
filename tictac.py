@@ -60,25 +60,20 @@ class Game(object):
         # These are the initializations that need to happen
         # at the beginning and after restarts
 
-        # Horizontal lines
-        self.board_canvas.create_line(0,
-                                 Game.PADDING,
-                                 Game.BOARD_SIZE,
-                                 Game.PADDING)
-        self.board_canvas.create_line(0,
-                                 Game.PADDING * 2,
-                                 Game.BOARD_SIZE,
-                                 Game.PADDING * 2)
+        for i in range(1, Game.DIMENSION):
+            # Horizontal lines
+            self.board_canvas.create_line(0,
+                         Game.PADDING * i,
+                         Game.BOARD_SIZE,
+                         Game.PADDING * i)
+            # Vertical lines
+            self.board_canvas.create_line(Game.PADDING * i,
+                         0,
+                         Game.PADDING * i,
+                         Game.BOARD_SIZE)
 
-        # Vertical lines
-        self.board_canvas.create_line(Game.PADDING,
-                                 0,
-                                 Game.PADDING,
-                                 Game.BOARD_SIZE)
-        self.board_canvas.create_line(Game.PADDING * 2,
-                                 0,
-                                 Game.PADDING * 2,
-                                 Game.BOARD_SIZE)
+
+
         self.board_canvas.pack()
 
 
@@ -96,8 +91,8 @@ class Game(object):
         # This method is invoked when the user clicks on a square.
         # If the square is already taken, do nothing.
 
-        p_column = int(event.x * (3/Game.BOARD_SIZE))
-        p_row = int(event.y * (3/Game.BOARD_SIZE))
+        p_column = int(event.x * (Game.DIMENSION/Game.BOARD_SIZE))
+        p_row = int(event.y * (Game.DIMENSION/Game.BOARD_SIZE))
 
         if (p_column, p_row) in self.board:
             return
@@ -108,12 +103,11 @@ class Game(object):
 
             print("Not end, computer's move")
 
-            c_column = random.randint(0, 2)
-            c_row = random.randint(0, 2)
+            c_column = random.randint(0, Game.DIMENSION-1)
+            c_row = random.randint(0, Game.DIMENSION-1)
             while (c_column, c_row) in self.board:
-                print("Got",(c_column, c_row),"Repicking for computer")
-                c_column = random.randint(0, 2)
-                c_row = random.randint(0, 2)
+                c_column = random.randint(0, Game.DIMENSION-1)
+                c_row = random.randint(0, Game.DIMENSION-1)
 
             print("Computer moving to:", (c_column, c_row))
 
@@ -121,7 +115,7 @@ class Game(object):
             self.check_game_ended()
 
     def move(self, column, row, player):
-        if 0 <= column <= 2 and 0 <= row <= 2:
+        if 0 <= column <= Game.DIMENSION and 0 <= row <= Game.DIMENSION:
             if (column, row) not in self.board:
                 if player:
                     player = "P"
@@ -134,7 +128,8 @@ class Game(object):
         self.status_line.config(text=text)
 
     def no_more_moves(self):
-        return len(self.board) >= 9
+        print("Filled:",len(self.board))
+        return len(self.board) >= Game.DIMENSION * Game.DIMENSION
 
     def check_game_ended(self):
         # Check if player won and tie
@@ -142,11 +137,12 @@ class Game(object):
         check = self.check_game()
 
         no_more_moves = self.no_more_moves()
-        if check is not None:
-            if no_more_moves:
-                self.update_status_line("It's a tie!")
-                end = True
-            elif check:
+
+        if no_more_moves:
+            self.update_status_line("It's a tie!")
+            end = True
+        elif check is not None:
+            if check:
                 self.update_status_line("Congrats, you won!")
                 end = True
             elif not check:
@@ -171,38 +167,43 @@ class Game(object):
     def check_vertical(self):
         for row in self.get_column_vals():
             result = self.dict_to_vals(row)
-            if len(result) == 3 and len(set(result)) == 1:
+            if len(result) == Game.DIMENSION and len(set(result)) == 1:
                 return result[0]
 
     def check_horizontal(self):
         for row in self.get_row_vals():
             result = self.dict_to_vals(row)
-            if len(result) == 3 and len(set(result)) == 1:
+            if len(result) == Game.DIMENSION and len(set(result)) == 1:
                 return result[0]
 
     def check_diagonal(self):
         for row in self.get_diag_vals():
             result = self.dict_to_vals(row)
-            if len(result) == 3 and len(set(result)) == 1:
+            if len(result) == Game.DIMENSION and len(set(result)) == 1:
                 return result[0]
 
     def get_row_vals(self):
-        return [[(k, line) for k in range(0,3)] for line in range(0,3)]
+        return [[(k, line) for k in range(Game.DIMENSION)] for line in range(Game.DIMENSION)]
 
     def get_column_vals(self):
-        return [[(line, k) for k in range(0,3)] for line in range(0,3)]
+        return [[(line, k) for k in range(Game.DIMENSION)] for line in range(Game.DIMENSION)]
 
     def get_diag_vals(self):
-        return [[(i, 2-i) for i in range(2,-1,-1)], [(i, i) for i in range(
-            0,3)]]
+        return [[(i, Game.DIMENSION-1-i) for i in range(Game.DIMENSION-1,-1,
+                                                        -1)], [(i,
+                                                                    i) for i in range(
+            Game.DIMENSION)]]
 
     def dict_to_vals(self, arr):
         return [v for k, v in self.board.items() if k in arr]
 
     def fill_grid(self, column, row, player):
+
+        print("Print size:", Game.BOARD_SIZE)
+
         grid_start = (column * Game.PADDING, row * Game.PADDING)
         grid_end = (grid_start[0] + Game.PADDING, grid_start[1] + Game.PADDING)
-
+        print("Filling:", (grid_start, grid_end))
         color = "green"
         if player != "P":
             color = "blue"
