@@ -16,8 +16,9 @@ class Game(object):
     '''
     Enter the class docstring here
     '''
-    BOARD_SIZE = 500
-    PADDING = BOARD_SIZE // 3
+    BOARD_SIZE = 1000
+    DIMENSION = 3
+    PADDING = BOARD_SIZE // DIMENSION
     # Add your class variables if needed here
     def __init__(self, parent):
 
@@ -42,8 +43,6 @@ class Game(object):
         restart_button = tkinter.Button(top_frame, text="Restart")
         restart_button.bind("<Button-1>", self.restart)
         restart_button.pack()
-
-
 
 
         # Bind action
@@ -112,6 +111,7 @@ class Game(object):
             c_column = random.randint(0, 2)
             c_row = random.randint(0, 2)
             while (c_column, c_row) in self.board:
+                print("Got",(c_column, c_row),"Repicking for computer")
                 c_column = random.randint(0, 2)
                 c_row = random.randint(0, 2)
 
@@ -151,6 +151,7 @@ class Game(object):
                 end = True
             elif not check:
                 self.update_status_line("You lost!")
+                end = True
         return end
 
     def check_game(self):
@@ -161,7 +162,6 @@ class Game(object):
         hori_winner = self.check_horizontal()
 
         winner = [diag_winner, vert_winner, hori_winner]
-        print("winner is:", winner)
 
         if "P" in winner:
             return True
@@ -169,21 +169,18 @@ class Game(object):
             return False
 
     def check_vertical(self):
-        print("Checking vertically:")
         for row in self.get_column_vals():
             result = self.dict_to_vals(row)
             if len(result) == 3 and len(set(result)) == 1:
                 return result[0]
 
     def check_horizontal(self):
-        print("Checking horizontally:")
         for row in self.get_row_vals():
             result = self.dict_to_vals(row)
             if len(result) == 3 and len(set(result)) == 1:
                 return result[0]
 
     def check_diagonal(self):
-        print("Checking diag:")
         for row in self.get_diag_vals():
             result = self.dict_to_vals(row)
             if len(result) == 3 and len(set(result)) == 1:
@@ -196,18 +193,15 @@ class Game(object):
         return [[(line, k) for k in range(0,3)] for line in range(0,3)]
 
     def get_diag_vals(self):
-        return (((0, 0), (1, 1), (2, 2)), ((0, 2), (1, 1), (2, 0)))
+        return [[(i, 2-i) for i in range(2,-1,-1)], [(i, i) for i in range(
+            0,3)]]
 
     def dict_to_vals(self, arr):
         return [v for k, v in self.board.items() if k in arr]
 
     def fill_grid(self, column, row, player):
-        print("Filling:", (column, row), player)
-
         grid_start = (column * Game.PADDING, row * Game.PADDING)
         grid_end = (grid_start[0] + Game.PADDING, grid_start[1] + Game.PADDING)
-
-        print(grid_start, grid_end)
 
         color = "green"
         if player != "P":
