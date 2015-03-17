@@ -36,35 +36,27 @@ class Game(object):
     COLOR_PLAYER = "green"   # Grid color for player
     COLOR_COMPUTER = "blue"  # Grid color for computer
 
-    VICTORY_HORIZONTAL = list([[(k, line)
-                              for k in range(DIMENSION)]
-                              for line in range(DIMENSION)])
-
-    VICTORY_VERTICAL = list([[(line, k)
-                            for k in range(DIMENSION)]
-                            for line in range(DIMENSION)])
-
-    VICTORY_DIAGONAL = list([[(i, DIMENSION-1-i)
-                            for i in range(DIMENSION-1, -1, -1)],
-                            [(i, i)
-                            for i in range(DIMENSION)]])
+    @classmethod
+    def init_constants(cls):
+        cls.VICTORY_HORIZONTAL = list([[(k, line)
+                                      for k in range(Game.DIMENSION)]
+                                      for line in range(Game.DIMENSION)])
+        cls.VICTORY_VERTICAL = list([[(line, k)
+                                    for k in range(Game.DIMENSION)]
+                                    for line in range(Game.DIMENSION)])
+        cls.VICTORY_DIAGONAL = list([[(i, Game.DIMENSION-1-i)
+                                    for i in range(Game.DIMENSION-1, -1, -1)],
+                                    [(i, i)
+                                     for i in range(Game.DIMENSION)]])
 
     def __init__(self, parent):
+
+        self.init_constants()
+
         parent.title('Tic Tac Toe')
         self.parent = parent
         # Add your instance variables  if needed here
         self.board = dict()
-
-        # self.VICTORY_HORIZONTAL = list([(k, line)
-        #                                for k in range(Game.DIMENSION)]
-        #                                for line in range(Game.DIMENSION))
-        # self.VICTORY_VERTICAL = list([(line, k)
-        #                              for k in range(Game.DIMENSION)]
-        #                              for line in range(Game.DIMENSION))
-        # self.VICTORY_DIAGONAL = list([[(i, Game.DIMENSION-1-i)
-        #                              for i in range(Game.DIMENSION-1, -1, -1)],
-        #                              [(i, i)
-        #                              for i in range(Game.DIMENSION)]])
 
         top_frame = tkinter.Frame(parent)
         top_frame.pack(side=tkinter.TOP)
@@ -150,8 +142,8 @@ class Game(object):
     def check_game(self):
         # Check if the game is won or lost
         # Return True or False
-        d_winner = self.line_winner(self.VICTORY_DIAGONAL)
-        v_winner = self.line_winner(self.VICTORY_VERTICAL)
+        d_winner = self.line_winner(Game.VICTORY_DIAGONAL)
+        v_winner = self.line_winner(Game.VICTORY_VERTICAL)
         h_winner = self.line_winner(Game.VICTORY_HORIZONTAL)
 
         winner = [d_winner, v_winner, h_winner]
