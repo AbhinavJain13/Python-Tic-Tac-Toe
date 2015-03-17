@@ -188,19 +188,21 @@ class Game(object):
         else:
             return (column, row)
 
-    def get_smart_move(self):
+    def gen_smart_move(self):
         if not self.smart_route_valid():
             self.smart_route = self.gen_smart_route()
-        return [x for x in self.smart_route if x not in self.board].pop()
+        return [x for x in self.smart_route if x not in self.board] \
+               if self.smart_route else []
 
     def gen_smart_route(self):
-        pass
+        return []
 
     def smart_route_valid(self):
         """
         True if self.smart_route in self.board is all "C"s
         """
-        return "P" not in self.extract_values(self.smart_route)
+        return "P" not in self.extract_values(self.smart_route) \
+               if self.smart_route else False
 
     def update_status_line(self, text):
         self.status_line.config(text=text)
@@ -211,8 +213,10 @@ class Game(object):
     def line_winner(self, line):
         for row in line:
             result = self.extract_values(row)
-            if len(result) == Game.DIMENSION and len(set(result)) == 1:
-                return result[0]
+            return result[0] \
+                if len(result) == Game.DIMENSION and \
+                all(x == result[0] for x in result) \
+                else None
 
     def extract_values(self, arr):
         return [v for k, v in self.board.items() if k in arr]

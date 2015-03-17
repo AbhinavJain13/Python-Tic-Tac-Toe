@@ -21,13 +21,68 @@ class TestTicTac(unittest.TestCase):
         self.assertIsNone(self.game.board.get((0, 0)))
         self.assertNotEqual(self.game.board.get((0, 0)), "P")
 
-    def test_smart_route_valid(self):
+    def test_smart_route_valid_empty(self):
+        self.assertFalse(self.game.smart_route_valid())
+
+    def test_smart_route_valid_blocked(self):
         self.simulate_move(0, 0, "C")
         self.simulate_move(1, 0, "P")
+
+        # Noise
+        self.simulate_move(2, 2, "C")
+        self.simulate_move(1, 2, "C")
+        # end Noise
+
         self.game.smart_route = [(0, 0), (1, 0), (2, 0)]
         self.assertFalse(self.game.smart_route_valid())
 
+    def test_smart_route_valid_all_computers(self):
         self.simulate_move(0, 1, "C")
         self.simulate_move(1, 1, "C")
+
+        # Noise
+        self.simulate_move(0, 0, "P")
+        self.simulate_move(1, 0, "P")
+        # end Noise
+
         self.game.smart_route = [(0, 1), (1, 1), (2, 1)]
         self.assertTrue(self.game.smart_route_valid())
+
+    def test_smart_route_valid_all_player(self):
+        self.simulate_move(0, 1, "P")
+        self.simulate_move(1, 1, "P")
+
+        # Noise
+        self.simulate_move(2, 2, "C")
+        self.simulate_move(0, 0, "C")
+        # end Noise
+
+        self.game.smart_route = [(0, 1), (1, 1), (2, 1)]
+        self.assertFalse(self.game.smart_route_valid())
+
+    def test_gen_smart_move_empty(self):
+        self.assertTrue(isinstance(self.game.gen_smart_move(), list))
+
+    def test_gen_smart_move_valid_smart_route(self):
+        self.game.smart_route = [(0, 1), (1, 1), (2, 1)]
+        self.assertIsNotNone(self.game.gen_smart_move())
+
+    def test_line_winner_player(self):
+        self.simulate_move(0, 1, "P")
+        self.simulate_move(1, 1, "P")
+        self.simulate_move(2, 1, "P")
+        self.assertEqual(self.game.line_winner([[(0, 1), (1, 1), (2, 1)]]),
+                         "P")
+
+    def test_line_winner_computer(self):
+        self.simulate_move(0, 1, "C")
+        self.simulate_move(1, 1, "C")
+        self.simulate_move(2, 1, "C")
+        self.assertEqual(self.game.line_winner([[(0, 1), (1, 1), (2, 1)]]),
+                         "C")
+
+    def test_line_winner_no_one(self):
+        self.simulate_move(0, 1, "C")
+        self.simulate_move(1, 1, "P")
+        self.simulate_move(2, 1, "P")
+        self.assertIsNone(self.game.line_winner([[(0, 1), (1, 1), (2, 1)]]))
