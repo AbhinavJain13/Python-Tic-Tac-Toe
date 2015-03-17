@@ -5,7 +5,10 @@
 # Author:
 # -----------------------------------------------------------------------------
 """
-Enter the module docstring here
+Play tic tac toe of any board size with computer.
+
+A GUI application that simulates a tic tac toe game, use mouse to play the
+game with computer. Player and computer take turn on the same board.
 """
 import tkinter
 import random
@@ -126,7 +129,8 @@ class Game(object):
         p_column = int(event.x * (Game.DIMENSION/Game.BOARD_SIZE))
         p_row = int(event.y * (Game.DIMENSION/Game.BOARD_SIZE))
 
-        if (p_column, p_row) not in self.board:
+        if 0 <= p_column <= 2 and 0 <= p_row <= 2 \
+           and (p_column, p_row) not in self.board:
             self.move((p_column, p_row), "P")
             # Player made a move, check if won
             if not self.check_game_ended():
@@ -198,6 +202,9 @@ class Game(object):
         return [v for k, v in self.board.items() if k in arr]
 
     def fill_grid(self, column, row, player):
+
+        print("Filling for", (column, row))
+
         grid_start = (column * Game.GRID_SIZE, row * Game.GRID_SIZE)
         grid_end = (grid_start[0] + Game.GRID_SIZE,
                     grid_start[1] + Game.GRID_SIZE)
