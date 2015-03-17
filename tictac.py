@@ -64,7 +64,6 @@ class Game(object):
         board_canvas = tkinter.Canvas(center_frame,
                                       width=Game.BOARD_SIZE,
                                       height=Game.BOARD_SIZE)
-        board_canvas.bind("<Button-1>", self.play)
 
         # Create the restart button widget
         restart_button = tkinter.Button(top_frame, text="Restart")
@@ -101,7 +100,7 @@ class Game(object):
                                           0,
                                           Game.GRID_SIZE * i,
                                           Game.BOARD_SIZE)
-
+        self.board_canvas.bind("<Button-1>", self.play)
         self.board_canvas.pack()
 
     def restart(self, event):
@@ -128,11 +127,11 @@ class Game(object):
         p_row = int(event.y * (Game.DIMENSION/Game.BOARD_SIZE))
 
         if (p_column, p_row) not in self.board:
-            self.move((p_column, p_row), True)
+            self.move((p_column, p_row), "P")
             # Player made a move, check if won
             if not self.check_game_ended():
                 move = self.gen_random_move()
-                self.move(move, False)
+                self.move(move, "C")
                 self.check_game_ended()
 
     def check_game(self):
@@ -149,6 +148,24 @@ class Game(object):
         elif "C" in winner:
             return False
 
+    def check_game_ended(self):
+        # Check if player won and tie
+        end = False
+        check = self.check_game()
+        no_more_moves = self.no_more_moves()
+
+        if no_more_moves and not check:
+            self.update_status_line("It's a tie!")
+            end = True
+        elif check is not None:
+            self.board_canvas.unbind("<Button-1>")
+            end = True
+            if check:
+                self.update_status_line("Congrats, you won!")
+            elif not check:
+                self.update_status_line("You lost!")
+        return end
+
     def gen_random_move(self, column=-1, row=-1):
         if column < 0 or row < 0 or (column, row) in self.board:
             return self.gen_random_move(random.randint(0, Game.DIMENSION-1),
@@ -162,10 +179,6 @@ class Game(object):
 
         if 0 <= column <= Game.DIMENSION and 0 <= row <= Game.DIMENSION:
             if (column, row) not in self.board:
-                if player:
-                    player = "P"
-                else:
-                    player = "C"
                 self.board[(column, row)] = player
                 self.fill_grid(column, row, player)
 
@@ -174,24 +187,6 @@ class Game(object):
 
     def no_more_moves(self):
         return len(self.board) >= Game.DIMENSION * Game.DIMENSION
-
-    def check_game_ended(self):
-        # Check if player won and tie
-        end = False
-        check = self.check_game()
-        no_more_moves = self.no_more_moves()
-
-        if no_more_moves and not check:
-            self.update_status_line("It's a tie!")
-            end = True
-        elif check is not None:
-            if check:
-                self.update_status_line("Congrats, you won!")
-                end = True
-            elif not check:
-                self.update_status_line("You lost!")
-                end = True
-        return end
 
     def line_winner(self, line):
         for row in line:
