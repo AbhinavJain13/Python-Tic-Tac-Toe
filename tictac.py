@@ -45,6 +45,8 @@ class Game(object):
         # Add your instance variables  if needed here
         self.board = dict()
 
+        self.smart_route = []
+
         self.VICTORY_HORIZONTAL = list([(k, line)
                                        for k in range(Game.DIMENSION)]
                                        for line in range(Game.DIMENSION))
@@ -170,13 +172,6 @@ class Game(object):
                 self.update_status_line("You lost!")
         return end
 
-    def gen_random_move(self, column=-1, row=-1):
-        if column < 0 or row < 0 or (column, row) in self.board:
-            return self.gen_random_move(random.randint(0, Game.DIMENSION-1),
-                                        random.randint(0, Game.DIMENSION-1))
-        else:
-            return (column, row)
-
     def move(self, move, player):
         column = move[0]
         row = move[1]
@@ -185,6 +180,24 @@ class Game(object):
             if (column, row) not in self.board:
                 self.board[(column, row)] = player
                 self.fill_grid(column, row, player)
+
+    def gen_random_move(self, column=-1, row=-1):
+        if column < 0 or row < 0 or (column, row) in self.board:
+            return self.gen_random_move(random.randint(0, Game.DIMENSION-1),
+                                        random.randint(0, Game.DIMENSION-1))
+        else:
+            return (column, row)
+
+    def get_smart_move(self):
+        if not self.smart_route_valid():
+            self.smart_route = self.gen_smart_route()
+        return [x for x in self.smart_route if x not in self.board].pop()
+
+    def gen_smart_route(self):
+        pass
+
+    def smart_route_valid(self):
+        return [x for x in self.smart_route if x in self.board] is None
 
     def update_status_line(self, text):
         self.status_line.config(text=text)
