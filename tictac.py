@@ -43,15 +43,15 @@ class Game(object):
         self.board = dict()
 
         self.VICTORY_HORIZONTAL = list([(k, line)
-                                   for k in range(Game.DIMENSION)]
-                                   for line in range(Game.DIMENSION))
+                                       for k in range(Game.DIMENSION)]
+                                       for line in range(Game.DIMENSION))
         self.VICTORY_VERTICAL = list([(line, k)
-                                 for k in range(Game.DIMENSION)]
-                                 for line in range(Game.DIMENSION))
-        self.VICTORY_DIAGONAL = list(([(i, Game.DIMENSION-1-i)
-                                 for i in range(Game.DIMENSION-1, -1, -1)],
-                                 [(i, i)
-                                 for i in range(Game.DIMENSION)]))
+                                     for k in range(Game.DIMENSION)]
+                                     for line in range(Game.DIMENSION))
+        self.VICTORY_DIAGONAL = list([[(i, Game.DIMENSION-1-i)
+                                     for i in range(Game.DIMENSION-1, -1, -1)],
+                                     [(i, i)
+                                     for i in range(Game.DIMENSION)]])
 
         top_frame = tkinter.Frame(parent)
         top_frame.pack(side=tkinter.TOP)
@@ -127,22 +127,20 @@ class Game(object):
         p_column = int(event.x * (Game.DIMENSION/Game.BOARD_SIZE))
         p_row = int(event.y * (Game.DIMENSION/Game.BOARD_SIZE))
 
-        if (p_column, p_row) in self.board:
-            return
-
-        self.move((p_column, p_row), True)
-        # Player made a move, check if won
-        if not self.check_game_ended():
-            move = self.gen_random_move()
-            self.move(move, False)
-            self.check_game_ended()
+        if (p_column, p_row) not in self.board:
+            self.move((p_column, p_row), True)
+            # Player made a move, check if won
+            if not self.check_game_ended():
+                move = self.gen_random_move()
+                self.move(move, False)
+                self.check_game_ended()
 
     def check_game(self):
         # Check if the game is won or lost
         # Return True or False
-        d_winner = self.diagonal_winner()
-        v_winner = self.vertical_winner()
-        h_winner = self.horizontal_winner()
+        d_winner = self.line_winner(self.VICTORY_DIAGONAL)
+        v_winner = self.line_winner(self.VICTORY_VERTICAL)
+        h_winner = self.line_winner(self.VICTORY_HORIZONTAL)
 
         winner = [d_winner, v_winner, h_winner]
 
@@ -183,7 +181,7 @@ class Game(object):
         check = self.check_game()
         no_more_moves = self.no_more_moves()
 
-        if no_more_moves and check is False:
+        if no_more_moves and not check:
             self.update_status_line("It's a tie!")
             end = True
         elif check is not None:
@@ -195,22 +193,8 @@ class Game(object):
                 end = True
         return end
 
-    def vertical_winner(self):
-        for row in self.VICTORY_VERTICAL:
-            result = self.extract_values(row)
-            if len(result) == Game.DIMENSION and len(set(result)) == 1:
-                return result[0]
-
-    def horizontal_winner(self):
-        print(self.VICTORY_HORIZONTAL)
-        for row in self.VICTORY_HORIZONTAL:
-            result = self.extract_values(row)
-            print(result)
-            if len(result) == Game.DIMENSION and len(set(result)) == 1:
-                return result[0]
-
-    def diagonal_winner(self):
-        for row in self.VICTORY_DIAGONAL:
+    def line_winner(self, line):
+        for row in line:
             result = self.extract_values(row)
             if len(result) == Game.DIMENSION and len(set(result)) == 1:
                 return result[0]
@@ -224,7 +208,7 @@ class Game(object):
                     grid_start[1] + Game.GRID_SIZE)
 
         color = Game.COLOR_PLAYER
-        if player != "P":
+        if player is "C":
             color = Game.COLOR_COMPUTER
 
         self.board_canvas.create_rectangle(grid_start[0],
