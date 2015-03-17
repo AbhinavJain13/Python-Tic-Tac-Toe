@@ -197,7 +197,10 @@ class Game(object):
         pass
 
     def smart_route_valid(self):
-        return [x for x in self.smart_route if x in self.board] is None
+        """
+        True if self.smart_route in self.board is all "C"s
+        """
+        return "P" not in self.extract_values(self.smart_route)
 
     def update_status_line(self, text):
         self.status_line.config(text=text)
