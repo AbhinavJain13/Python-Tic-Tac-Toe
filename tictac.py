@@ -195,7 +195,24 @@ class Game(object):
                if self.smart_route else []
 
     def gen_smart_route(self):
-        return []
+        c_moves = self.get_all_moves("C")
+        if not c_moves:
+            c_moves = [self.gen_random_move()]
+        impossible = False
+        win_h = []
+        win_v = []
+        win_d = []
+
+        while not (win_h or win_v or win_d) and not impossible:
+            for move in c_moves:
+                win_h = self.win(Game.VICTORY_HORIZONTAL, move)
+
+
+    def win(self, victory, move):
+        return move in [seq for seq in victory]
+
+    def get_all_moves(self, player):
+        return [move for move in self.board if self.board[move] is player]
 
     def smart_route_valid(self):
         """

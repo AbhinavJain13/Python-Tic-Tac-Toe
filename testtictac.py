@@ -67,6 +67,21 @@ class TestTicTac(unittest.TestCase):
         self.game.smart_route = [(0, 1), (1, 1), (2, 1)]
         self.assertIsNotNone(self.game.gen_smart_move())
 
+    def test_get_all_moves_player(self):
+        self.simulate_move(0, 1, "P")
+        self.simulate_move(1, 1, "P")
+        self.simulate_move(2, 1, "P")
+        self.assertListEqual(self.game.get_all_moves("P"), [(0,1),(1,1),(2,1)])
+
+    def test_get_all_moves_computer(self):
+        self.simulate_move(0, 1, "C")
+        self.simulate_move(1, 1, "C")
+        self.simulate_move(2, 1, "C")
+        self.assertListEqual(self.game.get_all_moves("C"), [(0,1),(1,1),(2,1)])
+
+    def test_win(self):
+        self.assertTrue(self.game.win(Game.VICTORY_HORIZONTAL,(0,0)))
+
     def test_line_winner_player(self):
         self.simulate_move(0, 1, "P")
         self.simulate_move(1, 1, "P")
