@@ -39,12 +39,22 @@ class Game(object):
     COLOR_PLAYER = "green"   # Grid color for player
     COLOR_COMPUTER = "blue"  # Grid color for computer
 
-    VICTORY_HORIZONTAL = []
-    VICTORY_VERTICAL = []
-    VICTORY_DIAGONAL = []
+    # Victory constants, to be instantiated
+    VICTORY_HORIZONTAL = []  # Horizontal victory
+    VICTORY_VERTICAL = []    # Vertical victory
+    VICTORY_DIAGONAL = []    # Diagonal victory
 
     @classmethod
     def init_constants(cls):
+        """
+        Initialize the victory lines constants, accessed by Game.VICTORY_*
+
+        Parameters:
+        None
+
+        Returns:
+        None
+        """
         cls.VICTORY_HORIZONTAL = list([[(k, line)
                                       for k in range(Game.DIMENSION)]
                                       for line in range(Game.DIMENSION)])
@@ -57,8 +67,17 @@ class Game(object):
                                      for i in range(Game.DIMENSION)]])
 
     def __init__(self, parent):
+        """
+        First instantiation of the game
 
-        self.init_constants()
+        Parameters:
+        parent (Tkinter.Tk): root window of the game
+
+        Returns:
+        Game (Game): the game itself
+        """
+
+        self.init_constants()  # init game constants
 
         parent.title('Tic Tac Toe')
         self.parent = parent
@@ -95,10 +114,10 @@ class Game(object):
         Draws separation lines onto board canvas
 
         Parameters:
-        none
+        None
 
         Returns:
-        none
+        None
         """
         # Draw separation lines
         for i in range(1, Game.DIMENSION):
@@ -124,7 +143,7 @@ class Game(object):
         event: Mouse event from Tkinter
 
         Returns:
-        none
+        None
         """
         self.board_canvas.delete("all")  # Erase the canvas
         self.board = dict()  # clear model
@@ -238,12 +257,32 @@ class Game(object):
         return len(self.board) >= Game.DIMENSION * Game.DIMENSION
 
     def line_winner(self, line):
+        """
+        Returns the winner of the line if exists.
+
+        Parameters:
+        line (List): use Game.VICTORY_*Line* constants to represent the line
+
+        Returns:
+        winner (String):
+        """
         for row in line:
             result = self.extract_values(row)
             if len(result) == Game.DIMENSION and len(set(result)) == 1:
                 return result[0]
 
     def extract_values(self, arr):
+        """
+        Extract a list of moves from the board and return their occupy status
+
+        Parameters:
+        arr (List): list of moves to be extracted from the board
+                    e.g. [(0,0), (0,1), (0,2)]
+
+        Returns:
+        occupy_statuses (List): the status of the grids extracted from arr
+                                e.g. ["C", "P", "P"]
+        """
         return [v for k, v in self.board.items() if k in arr]
 
     def fill_grid(self, column, row, player):
