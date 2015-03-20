@@ -64,7 +64,7 @@ class Game(object):
         cls.VICTORY_DIAGONAL = list([[(i, Game.DIMENSION-1-i)
                                     for i in range(Game.DIMENSION-1, -1, -1)],
                                     [(i, i)
-                                     for i in range(Game.DIMENSION)]])
+                                    for i in range(Game.DIMENSION)]])
 
     def __init__(self, parent):
         """
@@ -76,14 +76,15 @@ class Game(object):
         Returns:
         Game (Game): the game itself
         """
+        parent.title('Tic Tac Toe')  # set the window's title
 
         self.init_constants()  # init game constants
 
-        parent.title('Tic Tac Toe')
+        # Init instance variables
         self.parent = parent
-        # Add your instance variables  if needed here
         self.board = dict()
 
+        # Setup GUI
         top_frame = tkinter.Frame(parent)
         top_frame.pack(side=tkinter.TOP)
         center_frame = tkinter.Frame(top_frame)
@@ -105,8 +106,11 @@ class Game(object):
         status_line = tkinter.Label(bottom_frame, text="")
         status_line.pack()
 
+        # Add references to instance for further updates
         self.status_line = status_line
         self.board_canvas = board_canvas
+
+        # Draw game board
         self.initialize_game()
 
     def initialize_game(self):
@@ -151,9 +155,12 @@ class Game(object):
         self.initialize_game()  # invoke initialize_game
 
     def play(self, event):
-        # This method is invoked when the user clicks on a square.
-        # If the square is already taken, do nothing.
+        """
+        Event handler for handling user clicked on a grid on the board
 
+        Parameters:
+        event (Tkinter.Event): mouse event captured on the game board
+        """
         p_column = int(event.x * (Game.DIMENSION/Game.BOARD_SIZE))
         p_row = int(event.y * (Game.DIMENSION/Game.BOARD_SIZE))
 
@@ -167,8 +174,15 @@ class Game(object):
                 self.check_game_ended()
 
     def check_game(self):
-        # Check if the game is won or lost
-        # Return True or False
+        """
+        Check game status and returns the game if won or lost
+
+        Parameters:
+        None
+
+        Returns:
+        status (Boolean): returns True if player wins, False otherwise
+        """
         d_winner = self.line_winner(Game.VICTORY_DIAGONAL)
         v_winner = self.line_winner(Game.VICTORY_VERTICAL)
         h_winner = self.line_winner(Game.VICTORY_HORIZONTAL)
@@ -181,6 +195,15 @@ class Game(object):
             return False
 
     def check_game_ended(self):
+        """
+        Updates the game status and return the status of the game
+
+        Parameters:
+        None
+
+        Returns:
+        status (Boolean): returns True if game is ended, False otherwise
+        """
         # Check if player won and tie
         end = False
         check = self.check_game()
@@ -264,11 +287,13 @@ class Game(object):
         line (List): use Game.VICTORY_*Line* constants to represent the line
 
         Returns:
-        winner (String):
+        winner (String): returns None unless there exists a winner in line,
+                         then it will return either "P" for player or "C"
+                         for computer
         """
         for row in line:
             result = self.extract_values(row)
-            if len(result) == Game.DIMENSION and len(set(result)) == 1:
+            if result and result.count(result[0]) == Game.DIMENSION:
                 return result[0]
 
     def extract_values(self, arr):
@@ -286,6 +311,16 @@ class Game(object):
         return [v for k, v in self.board.items() if k in arr]
 
     def fill_grid(self, column, row, player):
+        """
+        Fill the grid at column and row for player / computer
+
+        Parameters:
+        column (Integer): target's column
+        row (Row): target's row
+
+        Returns:
+        None
+        """
         grid_start = (column * Game.GRID_SIZE, row * Game.GRID_SIZE)
         grid_end = (grid_start[0] + Game.GRID_SIZE,
                     grid_start[1] + Game.GRID_SIZE)
