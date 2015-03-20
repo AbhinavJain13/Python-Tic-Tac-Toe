@@ -46,7 +46,7 @@ class Game(object):
     VICTORY_DIAGONAL = []    # Diagonal victory
 
     @classmethod
-    def init_constants(cls):
+    def init_victories(cls):
         """
         Initialize the victory lines constants, accessed by Game.VICTORY_*
 
@@ -79,7 +79,7 @@ class Game(object):
         """
         parent.title('Tic Tac Toe')  # set the window's title
 
-        self.init_constants()  # init game constants
+        self.init_victories()  # init game constants
 
         # Init instance variables
         self.parent = parent
