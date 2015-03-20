@@ -39,6 +39,10 @@ class Game(object):
     COLOR_PLAYER = "green"   # Grid color for player
     COLOR_COMPUTER = "blue"  # Grid color for computer
 
+    VICTORY_HORIZONTAL = []
+    VICTORY_VERTICAL = []
+    VICTORY_DIAGONAL = []
+
     @classmethod
     def init_constants(cls):
         cls.VICTORY_HORIZONTAL = list([[(k, line)
@@ -207,9 +211,6 @@ class Game(object):
         return [v for k, v in self.board.items() if k in arr]
 
     def fill_grid(self, column, row, player):
-
-        print("Filling for", (column, row))
-
         grid_start = (column * Game.GRID_SIZE, row * Game.GRID_SIZE)
         grid_end = (grid_start[0] + Game.GRID_SIZE,
                     grid_start[1] + Game.GRID_SIZE)
