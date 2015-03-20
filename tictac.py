@@ -35,10 +35,10 @@ class Game(object):
 
     # Game setting constants
     BOARD_SIZE = 500  # Board size
-    DIMENSION = 3      # Board dimension
+    DIMENSION = 5      # Board dimension
     GRID_SIZE = BOARD_SIZE // DIMENSION  # Size of each grid
-    COLOR_PLAYER = "green"   # Grid color for player
-    COLOR_COMPUTER = "blue"  # Grid color for computer
+    COLOR_PLAYER = "magenta"   # Grid color for player
+    COLOR_COMPUTER = "cyan"  # Grid color for computer
 
     # Victory constants, to be instantiated
     VICTORY_HORIZONTAL = []  # Horizontal victory
@@ -165,8 +165,10 @@ class Game(object):
         p_column = int(event.x * (Game.DIMENSION/Game.BOARD_SIZE))
         p_row = int(event.y * (Game.DIMENSION/Game.BOARD_SIZE))
 
-        if 0 <= p_column <= 2 and 0 <= p_row <= 2 \
-           and (p_column, p_row) not in self.board:
+        if 0 <= p_column <= Game.DIMENSION - 1 \
+            and 0 <= p_row <= Game.DIMENSION - 1 \
+                and (p_column, p_row) not in self.board:
+
             self.move((p_column, p_row), "P")
             # Player made a move, check if won
             if not self.check_game_ended():
@@ -217,8 +219,8 @@ class Game(object):
             self.board_canvas.unbind("<Button-1>")
             end = True
             if check:
-                self.update_status_line("Congrats, you won!")
-            elif not check:
+                self.update_status_line("You won!")
+            else:
                 self.update_status_line("You lost!")
         return end
 
@@ -237,8 +239,8 @@ class Game(object):
         return move if (column >= 0 and row >= 0) \
                         and (move not in self.board) \
                     else self.gen_random_move(
-                           random.randint(0, Game.DIMENSION-1),
-                           random.randint(0, Game.DIMENSION-1))
+                          random.randint(0, Game.DIMENSION-1),
+                          random.randint(0, Game.DIMENSION-1))
 
     def move(self, move, player):
         """
@@ -252,7 +254,7 @@ class Game(object):
         None
         """
 
-        if 0 <= move[0] <= Game.DIMENSION and 0 <= move[1] <= Game.DIMENSION\
+        if 0 <= move[0] <= Game.DIMENSION and 0 <= move[1] <= Game.DIMENSION \
                 and move not in self.board:
             self.board[move] = player
             self.fill_grid(move[0], move[1], player)
