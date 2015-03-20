@@ -180,25 +180,61 @@ class Game(object):
         return end
 
     def gen_random_move(self, column=-1, row=-1):
+        """
+        Recursive method that generates a valid move on the board
+
+        Parameters:
+        column (Optional integer): seed column
+        row (Optional integer): seed row
+
+        Returns:
+        move (Tuple): a valid move formatted as (column, row)
+        """
         if column < 0 or row < 0 or (column, row) in self.board:
             return self.gen_random_move(random.randint(0, Game.DIMENSION-1),
                                         random.randint(0, Game.DIMENSION-1))
         else:
-            return (column, row)
+            return column, row
 
     def move(self, move, player):
-        column = move[0]
-        row = move[1]
+        """
+        Place a move on board. If move is valid, fill the grid.
 
-        if 0 <= column <= Game.DIMENSION and 0 <= row <= Game.DIMENSION:
-            if (column, row) not in self.board:
-                self.board[(column, row)] = player
-                self.fill_grid(column, row, player)
+        Parameters:
+        move (Tuple): a move formatted as (column, row)
+        player (String): the name of player, "C" for computer, "P" for player
+
+        Returns:
+        None
+        """
+
+        if 0 <= move[0] <= Game.DIMENSION and 0 <= move[1] <= Game.DIMENSION\
+                and move not in self.board:
+            self.board[move] = player
+            self.fill_grid(move[0], move[1], player)
 
     def update_status_line(self, text):
+        """
+        Change the text on the GUI
+
+        Parameters:
+        text (String): text to update in GUI
+
+        Returns:
+        None
+        """
         self.status_line.config(text=text)
 
     def no_more_moves(self):
+        """
+        Check if there is any move left on the board
+
+        Parameters:
+        None
+
+        Returns:
+        has_move (Boolean): True if there is move left, False otherwise
+        """
         return len(self.board) >= Game.DIMENSION * Game.DIMENSION
 
     def line_winner(self, line):
