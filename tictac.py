@@ -279,7 +279,7 @@ class Game(object):
         Returns:
         has_move (Boolean): True if there is move left, False otherwise
         """
-        return len(self.board) >= Game.DIMENSION * Game.DIMENSION
+        return len(self.board) >= Game.DIMENSION ** 2
 
     def line_winner(self, line):
         """
