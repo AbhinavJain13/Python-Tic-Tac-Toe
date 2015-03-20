@@ -2,7 +2,8 @@
 # Name:       tictac
 # Purpose:    Implement a game of Tic Tac Toe
 #
-# Author:
+# Author: Hin Cheung Matthew Wo
+# Date: 03-09-2015
 # -----------------------------------------------------------------------------
 """
 Play tic tac toe of any board size with computer.
@@ -232,11 +233,12 @@ class Game(object):
         Returns:
         move (Tuple): a valid move formatted as (column, row)
         """
-        if column < 0 or row < 0 or (column, row) in self.board:
-            return self.gen_random_move(random.randint(0, Game.DIMENSION-1),
-                                        random.randint(0, Game.DIMENSION-1))
-        else:
-            return column, row
+        move = (column, row)
+        return move if (column >= 0 and row >= 0) \
+                        and (move not in self.board) \
+                    else self.gen_random_move(
+                           random.randint(0, Game.DIMENSION-1),
+                           random.randint(0, Game.DIMENSION-1))
 
     def move(self, move, player):
         """
@@ -285,14 +287,15 @@ class Game(object):
 
         Parameters:
         line (List): use Game.VICTORY_*Line* constants to represent the line
+                     of moves
 
         Returns:
         winner (String): returns None unless there exists a winner in line,
                          then it will return either "P" for player or "C"
                          for computer
         """
-        for row in line:
-            result = self.extract_values(row)
+        for moves in line:
+            result = self.extract_values(moves)
             if result and result.count(result[0]) == Game.DIMENSION:
                 return result[0]
 
