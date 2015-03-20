@@ -23,7 +23,9 @@ class Game(object):
     parent (Tkinter.Frame): Root frame for the game to show
 
     Attributes:
-    none
+    board (dictionary): representation of the game's board
+    status_line (tkinter.label): game status line
+    board_canvas (tkinter.canvas): game board canvas
 
     Class variables:
     BOARD_SIZE (int): Board size
@@ -31,11 +33,14 @@ class Game(object):
     GRID_SIZE (int): Size of each grid, computed
     COLOR_PLAYER (string): Grid color for player
     COLOR_COMPUTER (string): Grid color for computer
+    VICTORY_HORIZONTAL (list): lines that makes horizontal victory
+    VICTORY_VERTICAL (list): lines that makes vertical victory
+    VICTORY_DIAGONAL (list): lines that makes diagonal victory
     """
 
     # Game setting constants
     BOARD_SIZE = 500  # Board size
-    DIMENSION = 5      # Board dimension
+    DIMENSION = 3      # Board dimension
     GRID_SIZE = BOARD_SIZE // DIMENSION  # Size of each grid
     COLOR_PLAYER = "magenta"   # Grid color for player
     COLOR_COMPUTER = "cyan"  # Grid color for computer
@@ -82,7 +87,6 @@ class Game(object):
         self.init_victories()  # init game constants
 
         # Init instance variables
-        self.parent = parent
         self.board = dict()
 
         # Setup GUI
